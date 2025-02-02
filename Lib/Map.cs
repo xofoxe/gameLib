@@ -43,7 +43,13 @@ namespace ClassLibrary1
                 }
             }
         }
-        
+        public static bool ColapseFunc(int x, int y)
+        {
+            int mapHeight = map.GetLength(0);
+            int mapWidth = map.GetLength(1);
+
+            return y >= 0 && y < mapHeight && x >= 0 && x < mapWidth && map[y, x] != '#';
+        }
 
         private static char[,] gameMap;
         public static char[,] map
