@@ -93,44 +93,56 @@ namespace ClassLibrary1
 
         public void RunLogic(Game game)
         {
-            if (Alive)
+            if (!Alive)
             {
-                if (Animation.AnimationTrigger)
-                {
-                    tick = (tick + 1) % 10;
-                    if (tick == 6 || CurrentState == state.attack || CurrentState == state.pain)
-                    {
-                        tick = 0;
-                        int bih = rnd.Next(0, 2);
-                        GetBehavior(bih);
-                        MoveWay(game);
-                    }
-                }
-                if (CurrentState != state.attack)
-                {
-                    IsReloading = false;
-                }
-                Animation.animate(this, path);
-                switch (CurrentState)
-                {
-                    case state.attack: AnimateAttack(game); break;
-                    case state.walk: MoveFront(); break;
-                    case state.death: AnimateDeath(game); break;
-                    case state.pain: AnimatePain(game); break;
-                }
-                if (pain)
-                {
-                    CurrentState = state.pain;
-                }
-                if (Health <= 0)
-                {
-                    CurrentState = state.death;
-                    Animation.num = 0;
-                }
+                if (!Dead)
+                    AnimateDeath(game);
+                return;
             }
-            else if (!Dead)
+
+            HandleAnimationAndBehavior(game);
+            HandleStateActions(game);
+            HandleStateChanges();
+        }
+
+        private void HandleAnimationAndBehavior(Game game)
+        {
+            if (!Animation.AnimationTrigger) return;
+
+            tick = (tick + 1) % 10;
+            if (tick == 6 || CurrentState == state.attack || CurrentState == state.pain)
             {
-                AnimateDeath(game);
+                tick = 0;
+                GetBehavior(rnd.Next(0, 2));
+                MoveWay(game);
+            }
+        }
+
+        private void HandleStateActions(Game game)
+        {
+            Animation.animate(this, path);
+
+            switch (CurrentState)
+            {
+                case state.attack: AnimateAttack(game); break;
+                case state.walk: MoveFront(); break;
+                case state.death: AnimateDeath(game); break;
+                case state.pain: AnimatePain(game); break;
+            }
+        }
+
+        private void HandleStateChanges()
+        {
+            if (CurrentState != state.attack)
+                IsReloading = false;
+
+            if (pain)
+                CurrentState = state.pain;
+
+            if (Health <= 0)
+            {
+                CurrentState = state.death;
+                Animation.num = 0;
             }
         }
 
