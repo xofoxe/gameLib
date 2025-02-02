@@ -36,88 +36,33 @@ namespace ClassLibrary1
             pain,
             death
         }
+
         public void GetSprite(Mob mob)
         {
             float n = (float)Math.Atan2(Y - mob.Y, X - mob.X);
             float angle = n - RelAngle;
-            string direction;
 
             angle = (float)((angle + Math.PI) % (2 * Math.PI) - Math.PI);
 
             if (angle < -Math.PI)
             {
-                angle += 2 * (float)Math.PI;
+                angle += (float)(2 * Math.PI);
             }
-             
-            if (angle >= -Math.PI / 8 && angle < Math.PI / 8)
-            {
-                direction = "Back";
-            }
-            else if (angle >= Math.PI / 8 && angle < 3 * Math.PI / 8)
-            {
-                direction = "Back-left";
-            }
-            else if (angle >= 3 * Math.PI / 8 && angle < 5 * Math.PI / 8)
-            {
-                direction = "Left";
-            }
-            else if (angle >= 5 * Math.PI / 8 && angle < 7 * Math.PI / 8)
-            {
-                direction = "Front-left";
-            }
-            else if (angle >= -3 * Math.PI / 8 && angle < -Math.PI / 8)
-            {
-                direction = "Back-right";
-            }
-            else if (angle >= -5 * Math.PI / 8 && angle < -3 * Math.PI / 8)
-            {
-                direction = "Right";
-            }
-            else if (angle >= -7 * Math.PI / 8 && angle < -5 * Math.PI / 8)
-            {
-                direction = "Front-right";
-            }
-            else
-            {
-                direction = "Front";
-            }
-            switch (direction)
-            {
-                case "Front":
-                    path = "..\\..\\Resources\\ordinaryEnemy\\front\\";
-                    break;
-                case "Back":
-                    path = "..\\..\\Resources\\ordinaryEnemy\\back\\";
-                    break;
-                case "Front-right":
-                    path = "..\\..\\Resources\\ordinaryEnemy\\front-right\\";
-                    break;
-                case "Front-left":
-                    path = "..\\..\\Resources\\ordinaryEnemy\\front-left\\";
-                    break;
-                case "Back-right":
-                    path = "..\\..\\Resources\\ordinaryEnemy\\back-right\\";
-                    break;
-                case "Back-left":
-                    path = "..\\..\\Resources\\ordinaryEnemy\\back-left\\";
-                    break;
-                case "Right":
-                    path = "..\\..\\Resources\\ordinaryEnemy\\right\\";
-                    break;
-                case "Left":
-                    path = "..\\..\\Resources\\ordinaryEnemy\\left\\";
-                    break;
-            }
-            switch (CurrentState)
-            {
-                case state.attack: path += "attack\\"; break;
-                case state.idle: path += "idle\\"; break;
-                case state.walk: path += "walk\\"; break;
-                case state.death: path += "death\\"; break;
-                case state.pain: path += "pain\\"; break;
-            }
+
+            GetDirectionPath(angle);
         }
-        
+        public void GetDirectionPath(float angle)
+        {
+            string[] directions = { "Back", "Back-left", "Left", "Front-left", "Front", "Front-right", "Right", "Back-right" };
+
+            double normalizedAngle = (angle + 2 * Math.PI) % (2 * Math.PI);
+
+            int index = (int)Math.Floor((normalizedAngle + Math.PI / 8) / (Math.PI / 4)) % 8;
+
+            path = $"..\\..\\Resources\\ordinaryEnemy\\{directions[index]}\\";
+            path += $"{CurrentState.ToString().ToLower()}\\";
+        }
+
         public void Attack(Game game)
         {
             if (Visible && !IsReloading)
@@ -125,8 +70,7 @@ namespace ClassLibrary1
                 IsReloading = true;
                 game.Player.Health -= Damage;
             }
-        }
-         
+        }         
 
         public void GetBehavior(int a)
         {
