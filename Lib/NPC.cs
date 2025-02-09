@@ -22,11 +22,13 @@ namespace ClassLibrary1
         private string path = "..\\..\\Resources\\ordinaryEnemy\\";
         private Animation animation;
         private Random rnd;
+
         public NPC(Animation animation)
         {
             rnd = new Random();
             Animation = animation;
         }
+
         public enum state
         {
             attack,
@@ -51,6 +53,7 @@ namespace ClassLibrary1
 
             GetDirectionPath(angle);
         }
+
         public void GetDirectionPath(float angle)
         {
             string[] directions = { "Back", "Back-left", "Left", "Front-left", "Front", "Front-right", "Right", "Back-right" };
@@ -70,7 +73,7 @@ namespace ClassLibrary1
                 IsReloading = true;
                 game.Player.Health -= Damage;
             }
-        }         
+        }
 
         public void GetBehavior(int a)
         {
@@ -81,7 +84,8 @@ namespace ClassLibrary1
                 case 2: CurrentState = state.idle; break;
             }
         }
-        public void update(Game game)
+
+        public void Update(Game game)
         {
             Animation.checkAnimTime();
             if (!Dead)
@@ -95,8 +99,7 @@ namespace ClassLibrary1
         {
             if (!Alive)
             {
-                if (!Dead)
-                    AnimateDeath(game);
+                HandleDeath();
                 return;
             }
 
@@ -105,30 +108,10 @@ namespace ClassLibrary1
             HandleStateChanges();
         }
 
-        private void HandleAnimationAndBehavior(Game game)
+        private void HandleDeath()
         {
-            if (!Animation.AnimationTrigger) return;
-
-            tick = (tick + 1) % 10;
-            if (tick == 6 || CurrentState == state.attack || CurrentState == state.pain)
-            {
-                tick = 0;
-                GetBehavior(rnd.Next(0, 2));
-                MoveWay(game);
-            }
-        }
-
-        private void HandleStateActions(Game game)
-        {
-            Animation.animate(this, path);
-
-            switch (CurrentState)
-            {
-                case state.attack: AnimateAttack(game); break;
-                case state.walk: MoveFront(); break;
-                case state.death: AnimateDeath(game); break;
-                case state.pain: AnimatePain(game); break;
-            }
+            if (!Dead)
+                AnimateDeath(game);
         }
 
         private void HandleStateChanges()
@@ -146,7 +129,60 @@ namespace ClassLibrary1
             }
         }
 
-        public void spawnBot()
+        private void HandleAnimationAndBehavior(Game game)
+        {
+            if (!Animation.AnimationTrigger) return;
+
+            tick = (tick + 1) % 10;
+            if (tick == 6 || CurrentState == state.attack || CurrentState == state.pain)
+            {
+                tick = 0;
+                ChangeBehavior();
+                MoveWay(game);
+            }
+        }
+
+        private void ChangeBehavior()
+        {
+            GetBehavior(rnd.Next(0, 2));
+        }
+
+        private void HandleStateActions(Game game)
+        {
+            Animation.animate(this, path);
+
+            switch (CurrentState)
+            {
+                case state.attack:
+                    AnimateAttack(game);
+                    break;
+                case state.walk:
+                    MoveFront();
+                    break;
+                case state.death:
+                    AnimateDeath(game);
+                    break;
+                case state.pain:
+                    AnimatePain(game);
+                    break;
+            }
+        }
+
+        private void AnimatePain(Game game)
+        {
+            if (Animation.AnimationTrigger)
+            {
+                pain = false;
+            }
+        }
+
+        private void AnimateAttack(Game game)
+        {
+            Animation.animate(this, path);
+            Attack(game);
+        }
+
+        public void SpawnBot()
         {
             rnd = new Random();
             CurrentState = state.walk;
@@ -157,19 +193,7 @@ namespace ClassLibrary1
             }
             while (Map.map[(int)Y, (int)X] == '#');
         }
-        public void AnimateAttack(Game game)
-        {
-            Animation.animate(this, path);
-            Attack(game);
-        }
-        public void AnimatePain(Game game)
-        {
-            if (Animation.AnimationTrigger)
-            {
-                pain = false;
-            }
-        }
-         
+
         public void AnimateDeath(Game game)
         {
             pngFiles = Directory.GetFiles(path, "*.png", SearchOption.AllDirectories);
@@ -185,20 +209,25 @@ namespace ClassLibrary1
                 path = path + $"{frameCount - 1}" + ".png";
                 Sprite = new Bitmap(path);
             }
-
         }
-        public void chase(Game game)
+
+        public void Chase(Game game)
         {
             switch (CurrentState)
             {
-                case state.attack: AnimateAttack(game); break;
-                case state.idle: Animation.animate(this, path); break;
+                case state.attack:
+                    AnimateAttack(game);
+                    break;
+                case state.idle:
+                    Animation.animate(this, path);
+                    break;
                 case state.walk:
                     MoveFront();
                     Animation.animate(this, path);
                     break;
             }
         }
+
         public void MoveWay(Game game)
         {
             if (Animation.AnimationTrigger)
@@ -218,7 +247,6 @@ namespace ClassLibrary1
                     case 3: RelAngle = n - ((float)Math.PI); break;
                     case 4: RelAngle = n - ((float)Math.PI / 2f + (float)Math.PI); break;
                     case 5: RelAngle = n + ((float)Math.PI / 2f + (float)Math.PI); break;
-
                 }
             }
         }
@@ -237,41 +265,43 @@ namespace ClassLibrary1
                 if (Map.map[tryY, tryX] != '#') Y += dirY;
         }
 
-        public bool check_hit(Game game)
+        public bool CheckHit(Game game)
         {
             if (Visible)
             {
                 if ((game.CanvasSize.Width / 2 - SpriteWith / 2) < (DrawStartX + SpriteWith / 2) && (DrawStartX + SpriteWith / 2) < (game.CanvasSize.Width / 2 + SpriteWith / 2))
-                {                    
+                {
                     CurrentState = state.pain;
                     return true;
                 }
             }
             return false;
         }
-         
-
 
         public float Acсuracy
         {
             get => accuracy;
             set { accuracy = value; }
         }
+
         public bool Drop
         {
             get => drop;
             set { drop = value; }
         }
+
         public bool IsReloading
         {
             set { isReloading = value; }
             get => isReloading;
         }
+
         public int Tick
         {
             get => tick;
             set { tick = value; }
         }
+
         public bool Pain
         {
             get => pain;
