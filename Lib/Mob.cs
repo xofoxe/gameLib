@@ -32,41 +32,26 @@ namespace ClassLibrary1
         private bool alive;
         private float speedY;
         private float speedX;
+        
+        private float ValidateSpeed(float value)
+        {
+            if (value > 0.3f) return 0.3f;
+            if (value < 0) return 0;
+            return value;
+        }
+
         public float SpeedX
         {
-            set
-            {
-                if (value > 0.3)
-                {
-                    speedX = 0.3f;
-                }
-                else if (value < 0)
-                {
-                    speedX = 0;
-                }
-                else
-                    speedX = value;
-            }
+            set => speedX = ValidateSpeed(value);
             get => speedX;
         }
 
         public float SpeedY
         {
-            set
-            {
-                if (value > 0.3)
-                {
-                    speedY = 0.3f;
-                }
-                else if (value < 0)
-                {
-                    speedY = 0;
-                }
-                else
-                    speedY = value;
-            }
+            set => speedY = ValidateSpeed(value);
             get => speedY;
         }
+
         public bool Dead
         {
             get => dead;
